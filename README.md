@@ -1,2 +1,8 @@
 # v9-bears-team-06
-Add-project-description-here | Voyage-9 | https://chingu.io/
+Discord Joke Bot | Voyage-9 | https://chingu.io/  
+
+## Developers  
+Chris  
+Alvaro  
+
+## More to come...
