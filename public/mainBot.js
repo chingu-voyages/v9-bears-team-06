@@ -1,6 +1,6 @@
 const Discord = require('discord.js')
 const jokes = require('./modules/jokeapi.js')
-const blackjack = require('./modules/blackjack.js')
+const blackjack = require('./game/blackjack.js')
 const client = new Discord.Client()
 
 let messageCount = 0
