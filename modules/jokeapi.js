@@ -11,7 +11,7 @@ module.exports = {
      * */
     getJokes: async (category, flags) => {
         try {
-            if (category !== '' && flags !== undefined) {
+            if (category !== '' || flags !== undefined) {
                 let url = `https://sv443.net/jokeapi/category/${category}?blacklistFlags=${flags}`;
                 let response = await axios.get(url);
                 return response
