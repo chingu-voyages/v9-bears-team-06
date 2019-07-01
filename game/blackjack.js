@@ -62,10 +62,10 @@ class Blackjack {
     // }
     drawCard (player) {
         const CARDS = ['A','2','3','4','5','6','7','8','9','10','J','Q','K']
-        const SYMBOLS = ['hearts','spades','diamonds','clubs']
+        const SYMBOLS = [':hearts:',':spades:',':diamonds:',':clubs:']
         let rand_value = randNum(0, CARDS.length-1)
         let rand_sym = randNum(0, SYMBOLS.length-1)
-        this.setPlayerCard(player, `${CARDS[rand_value]} :${SYMBOLS[rand_sym]}:`)
+        this.setPlayerCard(player, `${CARDS[rand_value]} ${SYMBOLS[rand_sym]}`)
         function randNum(min, max) {
             min = Math.ceil(min)
             max = Math.floor(max)

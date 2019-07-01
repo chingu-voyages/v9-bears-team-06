@@ -1,32 +1,39 @@
 const Discord = require('discord.js')
-const jokes = require('./modules/jokeapi.js')
-const blackjack = require('./game/blackjack.js')
+const jokes = require('../modules/jokeapi.js')
+const blackjack = require('../game/blackjack.js')
 const client = new Discord.Client()
+const game = new blackjack()
 
-let messageCount = 0
-let commandsReceived = 0
+let state = {
+    currentGame: false
+}
 
 client.on('ready', () => {
     //basic startup message when bot is started
     console.log(`Ready to serve.`)
 })
 
+client.on('guildMemberAdd', member => {
+    let channel = member.guild.channels.find(ch => ch.name == 'general')
+    channel.send(`Welcome, ${member}!`)
+})
+
 client.on('message', msg => {
-    messageCount++
+    console.log(`Message sent by: ${msg.author.username}`)
+    console.log(`Message contents: ${msg.content}`)
     //logic to make sure the message didn't originate from bot
     if (msg.author == client.user) {
         return
     }
     //logic to take commands
     if (msg.content.startsWith('$')) {
-        runCommand(msg.content.substr(1).toLowerCase())
-        commandsReceived++
+        runCommand(msg)
     }
 })
 
 async function runCommand(message){
-    let command = message.split(' ')
-    if (command.length > 1) {
+    let command = message.content.substr(1).split(' ')
+    if (command.length > 0) {
         let primaryCommand = command[0]
         /*
           command args in case we want to use params for a command like "$help blackjack"
@@ -34,11 +41,9 @@ async function runCommand(message){
         */
         let commandArguments = command.slice(1)
         //server console output to keep a live log of pertinent activity
-        console.log("Messages received: ", messageCount)
-        console.log("Commands received: ", commandsReceived)
         
         console.log("Command received: ", primaryCommand)
-        console.log("Command sent by: ", msg.author.username)
+        console.log("Command sent by: ", message.author.username)
 
         console.log("Command arguments: ", commandArguments)
 
@@ -47,7 +52,24 @@ async function runCommand(message){
                 runHelp(commandArguments, message)
                 break
             case "blackjack":
-                await playBlackjack(message)
+                let player = message.author.username
+                if(state[currentGame]){
+                    message.reply(` please wait for your turn. I'm not WATSON, I can only handle 1 player`)
+                } else {
+                    //the rest of the logic
+                
+                game.play(player)
+                //show the scores
+                //if message == 'hit'
+                game.hit(player)
+                //when game over 
+                //play again? yes or no
+                /*if no -> let index = state.findIndex((player) => {
+                    state.gameID == player
+                })
+                state.splice(index, 1)
+                */
+                }
                 break
             case "joke":
                 tellJoke(message)
@@ -70,16 +92,22 @@ function runHelp(commandArgs, message){
     }
 }
 
-async function playBlackjack(message){
+function playBlackjack(message){
     //call blackjack module  
-    await blackjack.play()
+    blackjack.play()
 }
 
-async function tellJoke(message){
+/* need to figure out the message.reply with a timeout for a delayed response
+   this will help with the two-part jokes
+*/
+
+/*
+function tellJoke(message){
+    respondToMsg(message)
     //ask for user input
-    message.channel.send('What kind of joke would you like to hear? Say "categories" for help.')
+     message.channel.send('What kind of joke would you like to hear? Say "categories" for help.')
     //logic to process what user has entered
-    await client.on('message', msg => {
+    client.on('message', msg => {
         //categories requested
         if (msg.content.toLowerCase() == "categories") {
             msg.channel.send(jokes.getCategories())
@@ -92,6 +120,22 @@ async function tellJoke(message){
             msg.channel.send("I'm supposed to tell the jokes!")
         }
     })
+}*/
+function tellJoke(message){
+    //ask for user input
+    jokes.getJokes('Any').then(response => {
+        if(response.data.type == 'twopart') {
+            message.reply(response.data.setup)
+            setTimeout(() => {
+                message.channel.send(response.data.delivery)
+            }, 2000)
+            
+        } else {
+
+            message.reply(response.data.joke)
+
+        }
+    })
 }
 
-client.login(secretToken)
+client.login("NTg4NTA4MDg4OTY2MDUzODk5.XQG03Q.zvc2ssdITVuSTR4imaZCgh5gqAc")
