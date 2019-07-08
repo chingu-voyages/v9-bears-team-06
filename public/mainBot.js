@@ -2,7 +2,9 @@ const Discord = require('discord.js')
 const jokes = require('../modules/jokeapi.js')
 const blackjack = require('../game/blackjack.js')
 const client = new Discord.Client()
-const game = new blackjack()
+
+require('dotenv').config({ path: '../.env'})
+console.log(process.env.KEY)
 
 let state = {
     currentGame: false
@@ -31,7 +33,7 @@ client.on('message', msg => {
     }
 })
 
-async function runCommand(message){
+function runCommand(message){
     let command = message.content.substr(1).split(' ')
     if (command.length > 0) {
         let primaryCommand = command[0]
@@ -52,23 +54,24 @@ async function runCommand(message){
                 runHelp(commandArguments, message)
                 break
             case "blackjack":
+                    
                 let player = message.author.username
-                if(state[currentGame]){
+                if(state['currentGame']){
                     message.reply(` please wait for your turn. I'm not WATSON, I can only handle 1 player`)
                 } else {
+                    const game = new blackjack(player)
                     //the rest of the logic
+                state['currentGame'] = true
                 
-                game.play(player)
+                game.play()
                 //show the scores
                 //if message == 'hit'
-                game.hit(player)
+                game.hit()
                 //when game over 
-                //play again? yes or no
-                /*if no -> let index = state.findIndex((player) => {
-                    state.gameID == player
-                })
-                state.splice(index, 1)
-                */
+                message.channel.send((game.getPlayer().score==100) ? 'bust' : game.getPlayer().score)
+                console.log(game.getPlayer())
+                
+                state['currentGame'] = false
                 }
                 break
             case "joke":
@@ -138,4 +141,4 @@ function tellJoke(message){
     })
 }
 
-client.login("NTg4NTA4MDg4OTY2MDUzODk5.XQG03Q.zvc2ssdITVuSTR4imaZCgh5gqAc")
+client.login(process.env.KEY)
