@@ -1,4 +1,3 @@
-'use strict'
 class Blackjack {
     constructor (player) {
         this.com = {
@@ -6,6 +5,7 @@ class Blackjack {
             score: 0,
             wins: 0,
             lost: 0,
+            draw: 0,
             cards: []
         }
         this.player = {
@@ -13,8 +13,15 @@ class Blackjack {
             score: 0,
             wins: 0,
             lost: 0,
+            draw: 0,
             cards: []
         }
+    }
+    newGame () {
+        this.player.cards = []
+        this.player.score = 0
+        this.com.score = 0
+        this.com.cards = []
     }
     setPlayerCard(player, cards) {
         if (player === this.player.name) {
@@ -23,18 +30,17 @@ class Blackjack {
             this.com.cards.push(cards)
         }
     }
+    setDraw() {
+        this.player.draw += 1
+        this.com.draw += 1
+    }
     setWinner(player) {
         if (player === this.player.name) {
             this.player.wins += 1
+            this.com.lost += 1
         } else {
             this.com.wins += 1
-        }
-    }
-    setLoser(player) {
-        if (player === this.player.name) {
             this.player.lost += 1
-        } else {
-            this.com.lost += 1
         }
     }
     getCom(){
@@ -54,12 +60,6 @@ class Blackjack {
         this.calculateScore(this.getPlayer())
         this.calculateScore(this.getCom())
     }
-    // play(command) {
-    //     if(command === "hit") {
-    //         this.drawCard(this.player.name)
-    //         this.calculateScore(this.getPlayer())
-    //     }
-    // }
     drawCard (player) {
         const CARDS = ['A','2','3','4','5','6','7','8','9','10','J','Q','K']
         const SYMBOLS = [':hearts:',':spades:',':diamonds:',':clubs:']
@@ -73,37 +73,77 @@ class Blackjack {
         }
     }
     calculateScore (player) {
-        player.cards.forEach(card => {
-            if (card.split(" ")[0] === "J" ||
-                card.split(" ")[0] === "Q" ||
-                card.split(" ")[0] === "K") {
-                    player.score += 10            
-                }
-            else if (card.split("-")[0] === "A"){
-                if(player.score < 10) {
-                    player.score += 1
+        let curr_score = player.score
+        if(player.cards.length === 2) { // inital calculation
+            player.cards.forEach(card => {
+                if (card.split(" ")[0] === "J" ||
+                    card.split(" ")[0] === "Q" ||
+                    card.split(" ")[0] === "K") {
+                        curr_score += 10            
+                    }
+                else if (card.split(" ")[0] === "A"){
+                    if(curr_score < 10) {
+                        curr_score += 1
+                    } else {
+                        curr_score += 11
+                    }
                 } else {
-                    player.score += 11
+                    curr_score += Number(card.split(" ")[0])
+                }
+            })
+        } else { // add only last card added to array
+            if (player.cards[player.cards.length-1].split(" ")[0] === "J" ||
+                player.cards[player.cards.length-1].split(" ")[0] === "Q" ||
+                player.cards[player.cards.length-1].split(" ")[0] === "K") {
+                    curr_score += 10            
+                }
+            else if (player.cards[player.cards.length-1].split(" ")[0] === "A"){
+                if(curr_score < 10) {
+                    curr_score += 1
+                } else {
+                    curr_score += 11
                 }
             } else {
-                player.score += Number(card.split(" ")[0])
+                curr_score += Number(player.cards[player.cards.length-1].split(" ")[0])
             }
-        })
+        }
+        if (curr_score > 21) {
+            player.score = 100
+        } else {
+            player.score = curr_score
+        }
     }
-    // hit(player)
-    // draw card and calculate score
-    // check for bust
-    // if 21 stay()
-
-    // stay(player)
-    // check com_score === 21
-        // reveal dealer hand win or draw
-    // com_score > 21 Bust 
-    // com_score < 21 and com score > player_Score
-        // com wins
-    // com_score < 17 
-        // draw card
-    
-
+    hit() {
+        let score = 0
+        this.drawCard(this.getPlayer().name)
+        this.calculateScore(this.getPlayer())
+        score = this.getPlayer().score
+    }
+    stay() {
+        let flag = true
+        let playerScore = this.getPlayer().score
+        let comScore = this.getCom().score
+        while (comScore < 17) { 
+            this.drawCard(this.getCom().name)
+            this.calculateScore(this.getCom())
+            comScore = this.getCom().score
+        }
+        if (comScore === playerScore) {
+            this.setDraw()
+            return 0
+        } else if (playerScore < 100 && comScore === 100) {
+            this.setWinner(this.player.name)
+            return 2
+        } else if (playerScore  ===  100 && comScore < 100) {
+            this.setWinner(this.com.name)
+            return 1
+        } else if (playerScore > comScore) {
+            this.setWinner(this.player.name)
+            return 2
+        } else if (playerScore < comScore) {
+            this.setWinner(this.com.name)
+            return 1
+        } 
+    }
 }
 module.exports = Blackjack;
