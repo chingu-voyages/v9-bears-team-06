@@ -2,18 +2,16 @@
 Discord Fun Bot | Voyage-9 | https://chingu.io/  
 
 ## Team Members
-Chris
+Chris  
 Alvaro
 
 **About**  
-Discord fun bot is a bot that you will be able to interact with it and  
-have fun when you need a change of pace in your discord chats. The fun bot will be able to tell you jokes  
-although it might a little raunchy but still might get you a laugh out of you. In addition to that it will
+Discord fun bot is a bot that you will be able to interact with it and have fun when you need a change of pace in your discord chats. The fun bot will be able to tell you jokes although it might a little raunchy but still might get you a laugh out of you. In addition to that it will
 play BlackJack with you how about that.
 
 **Live Demo**  
 to see the live demo you have to join the discord server  
-[Join Us][https://discord.gg/qvYZR2f]
+https://discord.gg/qvYZR2f
 
 **Technologies**
 - Discord JS
@@ -39,7 +37,7 @@ node mainBot.js
 ```  
 ## Test the bot
 In order to test the bot, you will need to create you own discord app and server and then add the bot to the server  
-Go to the section of 'How to add your bot to the server' of this tutorial [https://www.howtogeek.com/364225/how-to-make-your-own-discord-bot/]
+Go to the section of 'How to add your bot to the server' of this tutorial https://www.howtogeek.com/364225/how-to-make-your-own-discord-bot/
 
 **License**
 C.A.S.E.
