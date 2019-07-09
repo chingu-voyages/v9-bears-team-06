@@ -37,7 +37,8 @@ node mainBot.js
 ```  
 ## Test the bot
 In order to test the bot, you will need to create you own discord app and server and then add the bot to the server  
-Go to the section of 'How to add your bot to the server' of this tutorial https://www.howtogeek.com/364225/how-to-make-your-own-discord-bot/
+Go to the section of 'How to add your bot to the server' of this tutorial https://www.howtogeek.com/364225/how-to-make-your-own-discord-bot/  
+and follow the steps to add the bot to the server.  
 
 **License**
 C.A.S.E.
