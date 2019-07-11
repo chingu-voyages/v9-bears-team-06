@@ -16,6 +16,7 @@ client.on('ready', () => {
 })
 
 client.on('guildMemberAdd', member => {
+    //when a new user joins the server
     let channel = member.guild.channels.find(ch => ch.name == 'general')
     channel.send(`Welcome, ${member}!`)
 })
@@ -23,11 +24,11 @@ client.on('guildMemberAdd', member => {
 client.on('message', msg => {
     console.log(`Message sent by: ${msg.author.username}`)
     console.log(`Message contents: ${msg.content}`)
-    //logic to make sure the message didn't originate from bot
+    //don't respond to bot messages
     if (msg.author == client.user) {
         return
     }
-    //logic to take commands
+    //command input symbol is a dollar sign ($)
     if (msg.content.startsWith('$')) {
         runCommand(msg)
     }
@@ -39,21 +40,22 @@ function runCommand(message){
         let primaryCommand = command[0]
         /*
           command args in case we want to use params for a command like "$help blackjack"
-          then it would parse through the command and give help for blackjack (just an idea)
+          then it would parse through the command and give help for blackjack
         */
         let commandArguments = command.slice(1)
         //server console output to keep a live log of pertinent activity
         
         console.log("Command received: ", primaryCommand)
         console.log("Command sent by: ", message.author.username)
-
         console.log("Command arguments: ", commandArguments)
 
         switch (primaryCommand) {
+            //switch statement to handle the different commands available
             case "help":
                 runHelp(commandArguments, message)
                 break
-            case "blackjack":
+
+            case "blackjack": //play blackjack
                     
                 let player = message.author.username
                 if(state['currentGame']){
@@ -74,11 +76,12 @@ function runCommand(message){
                 state['currentGame'] = false
                 }
                 break
-            case "joke":
+            case "joke": //tells a joke
                 tellJoke(message)
                 break
+
             default:
-                message.channel.send(`${primaryCommand} is not a valid command`)
+                message.channel.send(`${primaryCommand} is not a valid command. Try '$help'`)
                 break
         }
 
@@ -91,7 +94,9 @@ function runHelp(commandArgs, message){
     if (commandArgs.length > 0){
         message.channel.send(`I cannot help you with ${commandArgs}`)
     } else {
-        message.channel.send('Let me tell you how I work...')
+        message.reply('Here is a list of current commands:')
+            message.channel.send('$joke')
+            message.channel.send('$blackjack')
     }
 }
 
