@@ -11,33 +11,47 @@ let state = {
     currentPlayer: '',
 }
 
+//basic startup message when bot is started
 client.on('ready', () => {
-    //basic startup message when bot is started
+
     console.log(`Ready to serve.`)
+
 })
 
+//when a new user joins the server
 client.on('guildMemberAdd', member => {
-    //when a new user joins the server
+
     let channel = member.guild.channels.find(ch => ch.name == 'general')
+
     channel.send(`Welcome, ${member}!`)
+
 })
 
 client.on('message', msg => {
+
     console.log(`Message sent by: ${msg.author.username}`)
     console.log(`Message contents: ${msg.content}`)
     //don't respond to bot messages
     if (msg.author == client.user) {
+
         return
+
     }
     //command input symbol is a dollar sign ($)
-    if (msg.content.startsWith('$')) {
+    if ( msg.content.startsWith('$') ) {
+
         runCommand(msg)
+
     }
+
 })
 
-function runCommand(message){
+function runCommand(message) {
+
     let command = message.content.substr(1).split(' ')
+
     if (command.length > 0) {
+        
         let primaryCommand = command[0]
         /*
           command args in case we want to use params for a command like "$help blackjack"
@@ -53,7 +67,9 @@ function runCommand(message){
         switch (primaryCommand) {
             //switch statement to handle the different commands available
             case "help":
+
                 runHelp(commandArguments, message)
+
                 break
 
             case "blackjack": //play blackjack
@@ -62,19 +78,39 @@ function runCommand(message){
 
                 if( state['currentGame'] ) {
 
-                    message.reply(` please wait for your turn. I'm not WATSON, I can only handle 1 player`)
+                    message.reply(` please wait your turn. I'm not WATSON, I can only handle 1 player`)
 
                 } else {
 
                     const game = new blackjack(player)
                     //the rest of the logic
                     state['currentGame'] = true
+
                     state['currentPlayer'] = message.author.username
                     
-                    game.play()
-                    //show the scores
-                    //if message == 'hit'
-                    game.hit()
+                    game.newGame()
+                        let dealerCards = game.getCom().cards
+                        message.channel.send(`Dealer cards: ${dealerCards[0]} [X]`) //hide one card for dealer cards
+                        message.channel.send(`Your cards: ${playerCards}`) //show both player cards on deal
+                        //a collector to check the messages coming in
+                        const collector = new Discord.MessageCollector(message.channel, 
+                            m => m.author.id === message.author.id, { time: 10000 })
+
+                        collector.on('collect', message => {
+                            if (message.content.toLowerCase() == 'hit') {
+                                game.hit()
+                                message.channel.send(`You drew: ${}`)
+                            }
+
+                            else if (message.content.toLowerCase() == 'stay') {
+                                game.stay()
+                            }
+
+                            else {
+                                message.reply('Please say `hit` or `stay`')
+                            }
+                        })
+
                     //when game over 
                     message.channel.send( ( game.getPlayer().score == 100 ) ? 'bust' : game.getPlayer().score )
 
@@ -107,10 +143,19 @@ function runHelp(commandArgs, message){
     }
 }
 
-function playBlackjack(message){
-    //call blackjack module  
-    blackjack.play()
-}
+/* 
+ if (command === 'spec'){
+        message.author.send("See or Change?");
+        const collector = new Discord.MessageCollector(message.channel, m => m.author.id === message.author.id, { time: 10000 });
+        console.log(collector)
+        collector.on('collect', message => {
+            if (message.content == "See") {
+                message.channel.send("You Want To See Someones Spec OK!");
+            } else if (message.content == "Change") {
+                message.channel.send("You Want To Change Your Spec OK!");
+            }
+        })
+*/
 
 /* need to figure out the message.reply with a timeout for a delayed response
    this will help with the two-part jokes
