@@ -7,7 +7,8 @@ require('dotenv').config({ path: '../.env'})
 console.log(process.env.KEY)
 
 let state = {
-    currentGame: false
+    currentGame: false,
+    currentPlayer: '',
 }
 
 client.on('ready', () => {
@@ -56,24 +57,30 @@ function runCommand(message){
                 break
 
             case "blackjack": //play blackjack
-                    
+
                 let player = message.author.username
-                if(state['currentGame']){
+
+                if( state['currentGame'] ) {
+
                     message.reply(` please wait for your turn. I'm not WATSON, I can only handle 1 player`)
+
                 } else {
+
                     const game = new blackjack(player)
                     //the rest of the logic
-                state['currentGame'] = true
-                
-                game.play()
-                //show the scores
-                //if message == 'hit'
-                game.hit()
-                //when game over 
-                message.channel.send((game.getPlayer().score==100) ? 'bust' : game.getPlayer().score)
-                console.log(game.getPlayer())
-                
-                state['currentGame'] = false
+                    state['currentGame'] = true
+                    state['currentPlayer'] = message.author.username
+                    
+                    game.play()
+                    //show the scores
+                    //if message == 'hit'
+                    game.hit()
+                    //when game over 
+                    message.channel.send( ( game.getPlayer().score == 100 ) ? 'bust' : game.getPlayer().score )
+
+                    console.log(game.getPlayer())
+                    
+                    state['currentGame'] = false
                 }
                 break
             case "joke": //tells a joke
@@ -109,31 +116,15 @@ function playBlackjack(message){
    this will help with the two-part jokes
 */
 
-/*
-function tellJoke(message){
-    respondToMsg(message)
-    //ask for user input
-     message.channel.send('What kind of joke would you like to hear? Say "categories" for help.')
-    //logic to process what user has entered
-    client.on('message', msg => {
-        //categories requested
-        if (msg.content.toLowerCase() == "categories") {
-            msg.channel.send(jokes.getCategories())
-        }
-        //if a category is listed, then fetch a joke
-        if (msg.content.includes(jokes.getCategories())){
-            msg.channel.send(jokes.getJokes(msg.content))
-        }
-        else {
-            msg.channel.send("I'm supposed to tell the jokes!")
-        }
-    })
-}*/
+
 function tellJoke(message){
     //ask for user input
     jokes.getJokes('Any').then(response => {
+
         if(response.data.type == 'twopart') {
+
             message.reply(response.data.setup)
+
             setTimeout(() => {
                 message.channel.send(response.data.delivery)
             }, 2000)
@@ -143,7 +134,9 @@ function tellJoke(message){
             message.reply(response.data.joke)
 
         }
+
     })
+
 }
 
 client.login(process.env.KEY)
