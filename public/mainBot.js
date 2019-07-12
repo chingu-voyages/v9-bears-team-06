@@ -89,7 +89,9 @@ function runCommand(message) {
                     state['currentPlayer'] = message.author.username
                     
                     game.newGame()
+                    game.play()
                         let dealerCards = game.getCom().cards
+                        let playerCards = game.getPlayer().cards
                         message.channel.send(`Dealer cards: ${dealerCards[0]} [X]`) //hide one card for dealer cards
                         message.channel.send(`Your cards: ${playerCards}`) //show both player cards on deal
                         //a collector to check the messages coming in
@@ -99,7 +101,7 @@ function runCommand(message) {
                         collector.on('collect', message => {
                             if (message.content.toLowerCase() == 'hit') {
                                 game.hit()
-                                message.channel.send(`You drew: ${}`)
+                                message.channel.send(`You drew: ${game.getPlayer().cards[cards.length-1]}`)
                             }
 
                             else if (message.content.toLowerCase() == 'stay') {
