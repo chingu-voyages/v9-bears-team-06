@@ -82,7 +82,7 @@ class Blackjack {
                         curr_score += 10            
                     }
                 else if (card.split(" ")[0] === "A"){
-                    if(curr_score < 10) {
+                    if(curr_score > 10) {
                         curr_score += 1
                     } else {
                         curr_score += 11

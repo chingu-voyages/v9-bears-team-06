@@ -2,81 +2,105 @@ const Discord = require('discord.js')
 const jokes = require('../modules/jokeapi.js')
 const blackjack = require('../game/blackjack.js')
 const client = new Discord.Client()
-const game = new blackjack()
+
+require('dotenv').config({ path: '../.env'})
+console.log(process.env.KEY)
 
 let state = {
-    currentGame: false
+    currentGame: false,
+    currentPlayer: '',
 }
 
+//basic startup message when bot is started
 client.on('ready', () => {
-    //basic startup message when bot is started
+
     console.log(`Ready to serve.`)
+
 })
 
+//when a new user joins the server
 client.on('guildMemberAdd', member => {
+
     let channel = member.guild.channels.find(ch => ch.name == 'general')
+
     channel.send(`Welcome, ${member}!`)
+
 })
 
 client.on('message', msg => {
+
     console.log(`Message sent by: ${msg.author.username}`)
     console.log(`Message contents: ${msg.content}`)
-    //logic to make sure the message didn't originate from bot
+    //don't respond to bot messages
     if (msg.author == client.user) {
+
         return
+
     }
-    //logic to take commands
-    if (msg.content.startsWith('$')) {
+    //command input symbol is a dollar sign ($)
+    if ( msg.content.startsWith('$') ) {
+
         runCommand(msg)
+
     }
+
 })
 
-async function runCommand(message){
+async function runCommand(message) {
+
+    //need to make sure the input will match whether capitalized or not
     let command = message.content.substr(1).split(' ')
+
     if (command.length > 0) {
+        
         let primaryCommand = command[0]
         /*
           command args in case we want to use params for a command like "$help blackjack"
-          then it would parse through the command and give help for blackjack (just an idea)
+          then it would parse through the command and give help for blackjack
         */
         let commandArguments = command.slice(1)
         //server console output to keep a live log of pertinent activity
         
         console.log("Command received: ", primaryCommand)
         console.log("Command sent by: ", message.author.username)
-
         console.log("Command arguments: ", commandArguments)
 
         switch (primaryCommand) {
+            //switch statement to handle the different commands available
             case "help":
+
                 runHelp(commandArguments, message)
+
                 break
-            case "blackjack":
+
+            case "blackjack": //play blackjack
+
                 let player = message.author.username
-                if(state[currentGame]){
-                    message.reply(` please wait for your turn. I'm not WATSON, I can only handle 1 player`)
+
+                if( state['currentGame'] ) {
+
+                    message.reply(` please wait your turn. I'm not WATSON, I can only handle 1 player`)
+
                 } else {
-                    //the rest of the logic
+
+                    await playBlackjack(message, player)
                 
-                game.play(player)
-                //show the scores
-                //if message == 'hit'
-                game.hit(player)
-                //when game over 
-                //play again? yes or no
-                /*if no -> let index = state.findIndex((player) => {
-                    state.gameID == player
-                })
-                state.splice(index, 1)
-                */
                 }
+
                 break
-            case "joke":
+
+            case "joke": //tells a joke
+                
                 tellJoke(message)
+                
                 break
+
             default:
-                message.channel.send(`${primaryCommand} is not a valid command`)
+                
+                message.channel.send(`${primaryCommand} is not a valid command. Try '$help'`)
+                
                 break
+        
         }
 
     }
@@ -85,57 +109,87 @@ async function runCommand(message){
 
 function runHelp(commandArgs, message){
     //basic help output
-    if (commandArgs.length > 0){
+    if (commandArgs.length > 0) {
+
         message.channel.send(`I cannot help you with ${commandArgs}`)
+
     } else {
-        message.channel.send('Let me tell you how I work...')
+
+        message.reply('Here is a list of current commands:')
+        setTimeout( () => {
+            message.channel.send('$joke')
+            message.channel.send('$blackjack')
+        }, 2000)
+
     }
+
 }
 
-function playBlackjack(message){
-    //call blackjack module  
-    blackjack.play()
+async function playBlackjack(message, player) {
+    
+    const game = new blackjack(player)
+    
+    state['currentGame'] = true
+
+    state['currentPlayer'] = player
+    
+    game.newGame()
+    
+    game.play()
+
+        let dealerCards = game.getCom().cards
+        let playerCards = game.getPlayer().cards
+        let lastDrawn = game.getPlayer().cards[playerCards.length-1]
+
+        message.channel.send(`Dealer cards: ${dealerCards[0]} [X]`) //hide one card for dealer's cards
+        message.channel.send(`Your cards: ${playerCards}`) //show both player cards on deal
+        //a collector to check the messages coming in
+        const filter = m => m.author.id == message.author.id
+    const collector = message.channel.createMessageCollector( filter, { time: 5000 })
+        console.log(collector)
+
+        collector.on('collect', message => {
+
+            if (message.content.toLowerCase() == 'hit') {
+                game.hit()
+                message.channel.send(`You drew: ${lastDrawn}`)
+            }
+
+            if (message.content.toLowerCase() == 'stay') {
+                game.stay()
+                collector.stop()
+            }
+        })
+
+    //when game over 
+    message.channel.send( ( game.getPlayer().score == 100 ) ? 'bust' : game.getPlayer().score )
+    
+    state['currentGame'] = false
+
 }
 
-/* need to figure out the message.reply with a timeout for a delayed response
-   this will help with the two-part jokes
-*/
-
-/*
-function tellJoke(message){
-    respondToMsg(message)
-    //ask for user input
-     message.channel.send('What kind of joke would you like to hear? Say "categories" for help.')
-    //logic to process what user has entered
-    client.on('message', msg => {
-        //categories requested
-        if (msg.content.toLowerCase() == "categories") {
-            msg.channel.send(jokes.getCategories())
-        }
-        //if a category is listed, then fetch a joke
-        if (msg.content.includes(jokes.getCategories())){
-            msg.channel.send(jokes.getJokes(msg.content))
-        }
-        else {
-            msg.channel.send("I'm supposed to tell the jokes!")
-        }
-    })
-}*/
 function tellJoke(message){
     //ask for user input
     jokes.getJokes('Any').then(response => {
+
         if(response.data.type == 'twopart') {
+
             message.reply(response.data.setup)
+
             setTimeout(() => {
                 message.channel.send(response.data.delivery)
-            }, 2000)
+            }, 3500)
             
         } else {
 
             message.reply(response.data.joke)
 
         }
+
     })
+
 }
 
+
 client.login(process.env.BOT_TOKEN)
+
