@@ -10,8 +10,7 @@ Discord fun bot is a bot that you will be able to interact with it and have fun 
 play BlackJack with you how about that.
 
 **Live Demo**  
-to see the live demo you have to join the discord server  
-https://discord.gg/qvYZR2f
+to see the live demo you have to join the discord server
 
 **Technologies**
 - Discord JS
