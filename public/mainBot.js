@@ -4,7 +4,7 @@ const blackjack = require('../game/blackjack.js')
 const client = new Discord.Client()
 
 require('dotenv').config({ path: '../.env'})
-console.log(process.env.KEY)
+console.log(process.env.BOT_TOKEN)
 
 let state = {
     currentGame: false,
@@ -23,7 +23,7 @@ client.on('guildMemberAdd', member => {
 
     let channel = member.guild.channels.find(ch => ch.name == 'general')
 
-    channel.send(`Welcome, ${member}!`)
+    channel.send(getGreeting(member))
 
 })
 
@@ -188,6 +188,25 @@ function tellJoke(message){
 
     })
 
+}
+
+//added a greeting function that can grow as people add to the welcome array
+const getGreeting = u => {
+    const greeting = {
+        welcome: [
+            `Welcome, ${u}`, 
+              `Where have you been, ${u}?`,
+              `${u}, you are IT. No tag backs!`,
+              `${u}, you look familiar.`,
+              `Greetings, "${u}" pun intended, ${u}`,
+              `There's no place like home...except when you are around ${u}.`,
+              `This place might be getting a little crowded. ${u} is taking up too much hard drive space.`
+            
+        ]
+    }
+
+    let i = (Math.ceil(Math.random() * greeting.welcome.length)) - 1
+    return greeting.welcome[i]
 }
 
 
