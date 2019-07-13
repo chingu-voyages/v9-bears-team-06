@@ -144,23 +144,20 @@ async function playBlackjack() {
         message.channel.send(`Dealer cards: ${dealerCards[0]} [X]`) //hide one card for dealer's cards
         message.channel.send(`Your cards: ${playerCards}`) //show both player cards on deal
         //a collector to check the messages coming in
-    const collector = new Discord.MessageCollector(message.channel, 
-            m => m.author.id == message.author.id, { time: 5000 })
+        const filter = m => m.author.id == message.author.id
+    const collector = message.channel.createMessageCollector( filter, { time: 5000 })
 
-        collector.on('message', message => {
+        collector.on('collect', message => {
 
             if (message.content.toLowerCase() == 'hit') {
                 game.hit()
                 message.channel.send(`You drew: ${lastDrawn}`)
             }
 
-            else if (message.content.toLowerCase() == 'stay') {
+            if (message.content.toLowerCase() == 'stay') {
                 game.stay()
             }
-
-            else {
-                message.reply('Please say `hit` or `stay`')
-            }
+            
         })
 
     //when game over 
