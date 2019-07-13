@@ -46,10 +46,10 @@ client.on('message', msg => {
 
 })
 
-function runCommand(message) {
+async function runCommand(message) {
 
     //need to make sure the input will match whether capitalized or not
-    let command = message.content.substr(1).split(' ').toLowerCase() 
+    let command = message.content.substr(1).split(' ')
 
     if (command.length > 0) {
         
@@ -83,7 +83,7 @@ function runCommand(message) {
 
                 } else {
 
-                    await playBlackjack()
+                    await playBlackjack(message, player)
                 
                 }
 
@@ -125,13 +125,13 @@ function runHelp(commandArgs, message){
 
 }
 
-async function playBlackjack() {
+async function playBlackjack(message, player) {
     
     const game = new blackjack(player)
     
     state['currentGame'] = true
 
-    state['currentPlayer'] = message.author.username
+    state['currentPlayer'] = player
     
     game.newGame()
     
@@ -139,13 +139,14 @@ async function playBlackjack() {
 
         let dealerCards = game.getCom().cards
         let playerCards = game.getPlayer().cards
-        let lastDrawn = game.getPlayer().cards[cards.length-1]
+        let lastDrawn = game.getPlayer().cards[playerCards.length-1]
 
         message.channel.send(`Dealer cards: ${dealerCards[0]} [X]`) //hide one card for dealer's cards
         message.channel.send(`Your cards: ${playerCards}`) //show both player cards on deal
         //a collector to check the messages coming in
         const filter = m => m.author.id == message.author.id
     const collector = message.channel.createMessageCollector( filter, { time: 5000 })
+        console.log(collector)
 
         collector.on('collect', message => {
 
@@ -177,7 +178,7 @@ function tellJoke(message){
 
             setTimeout(() => {
                 message.channel.send(response.data.delivery)
-            }, 2000)
+            }, 3500)
             
         } else {
 
