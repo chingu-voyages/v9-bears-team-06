@@ -156,8 +156,8 @@ async function playBlackjack() {
 
             if (message.content.toLowerCase() == 'stay') {
                 game.stay()
+                collector.stop()
             }
-            
         })
 
     //when game over 
@@ -166,24 +166,6 @@ async function playBlackjack() {
     state['currentGame'] = false
 
 }
-/* 
- if (command === 'spec'){
-        message.author.send("See or Change?");
-        const collector = new Discord.MessageCollector(message.channel, m => m.author.id === message.author.id, { time: 10000 });
-        console.log(collector)
-        collector.on('collect', message => {
-            if (message.content == "See") {
-                message.channel.send("You Want To See Someones Spec OK!");
-            } else if (message.content == "Change") {
-                message.channel.send("You Want To Change Your Spec OK!");
-            }
-        })
-*/
-
-/* need to figure out the message.reply with a timeout for a delayed response
-   this will help with the two-part jokes
-*/
-
 
 function tellJoke(message){
     //ask for user input
