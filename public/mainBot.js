@@ -48,7 +48,8 @@ client.on('message', msg => {
 
 function runCommand(message) {
 
-    let command = message.content.substr(1).split(' ')
+    //need to make sure the input will match whether capitalized or not
+    let command = message.content.substr(1).split(' ').toLowerCase() 
 
     if (command.length > 0) {
         
@@ -82,52 +83,24 @@ function runCommand(message) {
 
                 } else {
 
-                    const game = new blackjack(player)
-                    //the rest of the logic
-                    state['currentGame'] = true
-
-                    state['currentPlayer'] = message.author.username
-                    
-                    game.newGame()
-                    game.play()
-                        let dealerCards = game.getCom().cards
-                        let playerCards = game.getPlayer().cards
-                        message.channel.send(`Dealer cards: ${dealerCards[0]} [X]`) //hide one card for dealer cards
-                        message.channel.send(`Your cards: ${playerCards}`) //show both player cards on deal
-                        //a collector to check the messages coming in
-                        const collector = new Discord.MessageCollector(message.channel, 
-                            m => m.author.id === message.author.id, { time: 10000 })
-
-                        collector.on('collect', message => {
-                            if (message.content.toLowerCase() == 'hit') {
-                                game.hit()
-                                message.channel.send(`You drew: ${game.getPlayer().cards[cards.length-1]}`)
-                            }
-
-                            else if (message.content.toLowerCase() == 'stay') {
-                                game.stay()
-                            }
-
-                            else {
-                                message.reply('Please say `hit` or `stay`')
-                            }
-                        })
-
-                    //when game over 
-                    message.channel.send( ( game.getPlayer().score == 100 ) ? 'bust' : game.getPlayer().score )
-
-                    console.log(game.getPlayer())
-                    
-                    state['currentGame'] = false
+                    await playBlackjack()
+                
                 }
+
                 break
+
             case "joke": //tells a joke
+                
                 tellJoke(message)
+                
                 break
 
             default:
+                
                 message.channel.send(`${primaryCommand} is not a valid command. Try '$help'`)
+                
                 break
+        
         }
 
     }
@@ -136,15 +109,66 @@ function runCommand(message) {
 
 function runHelp(commandArgs, message){
     //basic help output
-    if (commandArgs.length > 0){
+    if (commandArgs.length > 0) {
+
         message.channel.send(`I cannot help you with ${commandArgs}`)
+
     } else {
+
         message.reply('Here is a list of current commands:')
+        setTimeout( () => {
             message.channel.send('$joke')
             message.channel.send('$blackjack')
+        }, 2000)
+
     }
+
 }
 
+async function playBlackjack() {
+    
+    const game = new blackjack(player)
+    
+    state['currentGame'] = true
+
+    state['currentPlayer'] = message.author.username
+    
+    game.newGame()
+    
+    game.play()
+
+        let dealerCards = game.getCom().cards
+        let playerCards = game.getPlayer().cards
+        let lastDrawn = game.getPlayer().cards[cards.length-1]
+
+        message.channel.send(`Dealer cards: ${dealerCards[0]} [X]`) //hide one card for dealer's cards
+        message.channel.send(`Your cards: ${playerCards}`) //show both player cards on deal
+        //a collector to check the messages coming in
+    const collector = new Discord.MessageCollector(message.channel, 
+            m => m.author.id == message.author.id, { time: 5000 })
+
+        collector.on('message', message => {
+
+            if (message.content.toLowerCase() == 'hit') {
+                game.hit()
+                message.channel.send(`You drew: ${lastDrawn}`)
+            }
+
+            else if (message.content.toLowerCase() == 'stay') {
+                game.stay()
+            }
+
+            else {
+                message.reply('Please say `hit` or `stay`')
+            }
+        })
+
+    //when game over 
+    message.channel.send( ( game.getPlayer().score == 100 ) ? 'bust' : game.getPlayer().score )
+    
+    state['currentGame'] = false
+
+}
 /* 
  if (command === 'spec'){
         message.author.send("See or Change?");
