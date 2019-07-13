@@ -190,4 +190,6 @@ function tellJoke(message){
 
 }
 
-client.login(process.env.KEY)
+
+client.login(process.env.BOT_TOKEN)
+
