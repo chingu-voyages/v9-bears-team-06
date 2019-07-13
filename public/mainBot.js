@@ -136,36 +136,44 @@ async function playBlackjack(message, player) {
     game.newGame()
     
     game.play()
-
+        
         let dealerCards = game.getCom().cards
         let playerCards = game.getPlayer().cards
+        let playerScore = game.getPlayer().score
+        let dealerScore = game.getCom().score
         let lastDrawn = game.getPlayer().cards[playerCards.length-1]
 
-        message.channel.send(`Dealer cards: ${dealerCards[0]} [X]`) //hide one card for dealer's cards
-        message.channel.send(`Your cards: ${playerCards}`) //show both player cards on deal
+        await message.channel.send(`Dealer cards: ${dealerCards[0]} [X]`) //hide one card for dealer's cards
+        await message.channel.send(`Your cards: ${playerCards}`) //show both player cards on deal
+        
         //a collector to check the messages coming in
-        const filter = m => m.author.id == message.author.id
-    const collector = message.channel.createMessageCollector( filter, { time: 5000 })
-        console.log(collector)
-
-        collector.on('collect', message => {
-
-            if (message.content.toLowerCase() == 'hit') {
-                game.hit()
-                message.channel.send(`You drew: ${lastDrawn}`)
-            }
-
-            if (message.content.toLowerCase() == 'stay') {
-                game.stay()
-                collector.stop()
-            }
-        })
+        await gameLogic(message)
 
     //when game over 
     message.channel.send( ( game.getPlayer().score == 100 ) ? 'bust' : game.getPlayer().score )
     
     state['currentGame'] = false
 
+}
+
+const gameLogic = async (message) => {
+//logic to await message for blackjack game!
+    await message.channel.send('Hit or Stay?')
+    let hit = await message.channel.awaitMessages( c => {
+        let choice = c.content.toLowerCase()
+        choice.includes('hit') }, { time: 1000 } )
+        console.log(hit)
+    let stay = await message.channel.awaitMessages( s => {
+        let choice2 = s.content.toLowerCase()
+        choice2.includes('stay')}, { time: 0 } )
+    
+    if (hit.length > 0) {
+        await message.channel.send(`You drew: ${lastDrawn} \n Your total score: ${playerScore}`)
+    }
+
+    if (stay.length > 0) {
+        return 
+    }
 }
 
 function tellJoke(message){
