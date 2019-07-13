@@ -138,4 +138,4 @@ function tellJoke(message){
     })
 }
 
-client.login("NTg4NTA4MDg4OTY2MDUzODk5.XQG03Q.zvc2ssdITVuSTR4imaZCgh5gqAc")
+client.login(process.env.BOT_TOKEN)
