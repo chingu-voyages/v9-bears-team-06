@@ -9,6 +9,11 @@ console.log(process.env.BOT_TOKEN)
 let state = {
     currentGame: false,
     currentPlayer: '',
+    outcome: '',
+    dealerCards: '',
+    playerCards: '',
+    playerScore: '',
+    dealerScore: ''
 }
 
 //basic startup message when bot is started
@@ -133,47 +138,81 @@ async function playBlackjack(message, player) {
 
     state['currentPlayer'] = player
     
-    game.newGame()
-    
     game.play()
         
-        let dealerCards = game.getCom().cards
-        let playerCards = game.getPlayer().cards
-        let playerScore = game.getPlayer().score
-        let dealerScore = game.getCom().score
-        let lastDrawn = game.getPlayer().cards[playerCards.length-1]
+        state.dealerCards = game.getCom().cards
+        state.playerCards = game.getPlayer().cards
+        state.playerScore = game.getPlayer().score
+        state.dealerScore = game.getCom().score
+        
 
-        await message.channel.send(`Dealer cards: ${dealerCards[0]} [X]`) //hide one card for dealer's cards
-        await message.channel.send(`Your cards: ${playerCards}`) //show both player cards on deal
+        await message.channel.send(`Dealer cards: ${state.dealerCards[0]} [X]`) //hide one card for dealer's cards
+        await message.channel.send(`Your cards: ${state.playerCards}`) //show both player cards on deal
         
         //a collector to check the messages coming in
-        await gameLogic(message)
+        while (state.currentGame) {   
+            
+            await gameLogic(message, game)
+            
+        }
 
     //when game over 
-    message.channel.send( ( game.getPlayer().score == 100 ) ? 'bust' : game.getPlayer().score )
+    message.channel.send( ( game.getPlayer().score == 100 ) ? 'Bust! You lose.' : game.getPlayer().cards )
     
+    message.channel.send(`Dealer has: ${state.dealerCards}  Score:  ${game.getCom().score}`)
+    message.channel.send(`Your cards: ${state.playerCards}  Score:  ${game.getPlayer().score}`)
+    message.channel.send(`You ${state.outcome}!`)
+    
+
     state['currentGame'] = false
 
 }
 
-const gameLogic = async (message) => {
+const gameLogic = async (message, game) => {
 //logic to await message for blackjack game!
-    await message.channel.send('Hit or Stay?')
-    let hit = await message.channel.awaitMessages( c => {
-        let choice = c.content.toLowerCase()
-        choice.includes('hit') }, { time: 1000 } )
-        console.log(hit)
-    let stay = await message.channel.awaitMessages( s => {
-        let choice2 = s.content.toLowerCase()
-        choice2.includes('stay')}, { time: 0 } )
-    
-    if (hit.length > 0) {
-        await message.channel.send(`You drew: ${lastDrawn} \n Your total score: ${playerScore}`)
+    if (game.getPlayer().score != 100) {
+        await message.channel.send('Hit or Stay?')
+        
+        let choice = await message.channel.awaitMessages( c => {
+            if (c.author.id === message.author.id) {
+                return c.content.includes('hit')
+            } else if (c.author.id === message.author.id) {
+                return c.content.includes('stay')
+            }
+        }, { time: 4000 } )
+        
+        choice = choice.map(x => x.content)
+        if (choice.length > 0) {
+            if (choice[0] == 'hit'){
+                game.hit()
+                let lastDrawn = game.getPlayer().cards[game.getPlayer().cards.length-1] 
+                message.channel.send(`You drew: ${lastDrawn}`)
+                console.log(game.player)
+                return
+            }
+            else {
+                //game.stay()
+                console.log(game.stay())
+                console.log(game)
+                state.currentGame = false
+            }
+        }
+        
+        else {
+            game.stay() == 0 ? state.outcome = 'draw' : game.stay() == 1 ? state.outcome = 'lose' : state.outcome = 'win'
+            console.log(game)
+            console.log(state.outcome)
+        
+            state.currentGame = false
+        }
+    }
+    else {
+        console.log(game)
+        game.stay() == 0 ? state.outcome = 'draw' : game.stay() == 1 ? state.outcome = 'lose' : state.outcome = 'win'
+        console.log(state.outcome)
+        state.currentGame = false
     }
 
-    if (stay.length > 0) {
-        return 
-    }
 }
 
 function tellJoke(message){
