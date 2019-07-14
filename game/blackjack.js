@@ -6,7 +6,8 @@ class Blackjack {
             wins: 0,
             lost: 0,
             draw: 0,
-            cards: []
+            cards: [],
+            busted: false
         }
         this.player = {
             name: player,
@@ -14,7 +15,8 @@ class Blackjack {
             wins: 0,
             lost: 0,
             draw: 0,
-            cards: []
+            cards: [],
+            busted: false
         }
     }
     newGame () {
@@ -98,7 +100,7 @@ class Blackjack {
                     curr_score += 10            
                 }
             else if (player.cards[player.cards.length-1].split(" ")[0] === "A"){
-                if(curr_score < 10) {
+                if(curr_score >  10) {
                     curr_score += 1
                 } else {
                     curr_score += 11
@@ -108,7 +110,8 @@ class Blackjack {
             }
         }
         if (curr_score > 21) {
-            player.score = 100
+            player.score = curr_score
+            player.busted = true
         } else {
             player.score = curr_score
         }
@@ -131,10 +134,10 @@ class Blackjack {
         if (comScore === playerScore) {
             this.setDraw()
             return 0
-        } else if (playerScore < 100 && comScore === 100) {
+        } else if (this.com.busted) {
             this.setWinner(this.player.name)
             return 2
-        } else if (playerScore  ===  100 && comScore < 100) {
+        } else if (this.player.busted) {
             this.setWinner(this.com.name)
             return 1
         } else if (playerScore > comScore) {

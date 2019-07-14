@@ -4,11 +4,16 @@ const blackjack = require('../game/blackjack.js')
 const client = new Discord.Client()
 
 require('dotenv').config({ path: '../.env'})
-console.log(process.env.KEY)
+console.log(process.env.BOT_TOKEN)
 
 let state = {
     currentGame: false,
     currentPlayer: '',
+    outcome: '',
+    dealerCards: '',
+    playerCards: '',
+    playerScore: '',
+    dealerScore: ''
 }
 
 //basic startup message when bot is started
@@ -23,7 +28,7 @@ client.on('guildMemberAdd', member => {
 
     let channel = member.guild.channels.find(ch => ch.name == 'general')
 
-    channel.send(`Welcome, ${member}!`)
+    channel.send(getGreeting(member))
 
 })
 
@@ -133,38 +138,80 @@ async function playBlackjack(message, player) {
 
     state['currentPlayer'] = player
     
-    game.newGame()
-    
     game.play()
+        
+        state.dealerCards = game.getCom().cards
+        state.playerCards = game.getPlayer().cards
+        state.playerScore = game.getPlayer().score
+        state.dealerScore = game.getCom().score
+        
 
-        let dealerCards = game.getCom().cards
-        let playerCards = game.getPlayer().cards
-        let lastDrawn = game.getPlayer().cards[playerCards.length-1]
-
-        message.channel.send(`Dealer cards: ${dealerCards[0]} [X]`) //hide one card for dealer's cards
-        message.channel.send(`Your cards: ${playerCards}`) //show both player cards on deal
+        await message.channel.send(`Dealer cards: ${state.dealerCards[0]} [X]`) //hide one card for dealer's cards
+        await message.channel.send(`Your cards: ${state.playerCards}`) //show both player cards on deal
+        
         //a collector to check the messages coming in
-        const filter = m => m.author.id == message.author.id
-    const collector = message.channel.createMessageCollector( filter, { time: 5000 })
-        console.log(collector)
-
-        collector.on('collect', message => {
-
-            if (message.content.toLowerCase() == 'hit') {
-                game.hit()
-                message.channel.send(`You drew: ${lastDrawn}`)
-            }
-
-            if (message.content.toLowerCase() == 'stay') {
-                game.stay()
-                collector.stop()
-            }
-        })
+        while (state.currentGame) {   
+            
+            await gameLogic(message, game)
+            
+        }
 
     //when game over 
-    message.channel.send( ( game.getPlayer().score == 100 ) ? 'bust' : game.getPlayer().score )
+    message.channel.send( ( game.getPlayer().score == 100 ) ? 'Bust! You lose.' : game.getPlayer().cards )
     
+    message.channel.send(`Dealer has: ${state.dealerCards}  Score:  ${game.getCom().score}`)
+    message.channel.send(`Your cards: ${state.playerCards}  Score:  ${game.getPlayer().score}`)
+    message.channel.send(`You ${state.outcome}!`)
+    
+
     state['currentGame'] = false
+
+}
+
+const gameLogic = async (message, game) => {
+//logic to await message for blackjack game!
+    if (game.getPlayer().score != 100) {
+        await message.channel.send('Hit or Stay?')
+        
+        let choice = await message.channel.awaitMessages( c => {
+            if (c.author.id === message.author.id) {
+                return c.content.includes('hit')
+            } else if (c.author.id === message.author.id) {
+                return c.content.includes('stay')
+            }
+        }, { time: 4000 } )
+        
+        choice = choice.map(x => x.content)
+        if (choice.length > 0) {
+            if (choice[0] == 'hit'){
+                game.hit()
+                let lastDrawn = game.getPlayer().cards[game.getPlayer().cards.length-1] 
+                message.channel.send(`You drew: ${lastDrawn}`)
+                console.log(game.player)
+                return
+            }
+            else {
+                //game.stay()
+                console.log(game.stay())
+                console.log(game)
+                state.currentGame = false
+            }
+        }
+        
+        else {
+            game.stay() == 0 ? state.outcome = 'draw' : game.stay() == 1 ? state.outcome = 'lose' : state.outcome = 'win'
+            console.log(game)
+            console.log(state.outcome)
+        
+            state.currentGame = false
+        }
+    }
+    else {
+        console.log(game)
+        game.stay() == 0 ? state.outcome = 'draw' : game.stay() == 1 ? state.outcome = 'lose' : state.outcome = 'win'
+        console.log(state.outcome)
+        state.currentGame = false
+    }
 
 }
 
@@ -188,6 +235,25 @@ function tellJoke(message){
 
     })
 
+}
+
+//added a greeting function that can grow as people add to the welcome array
+const getGreeting = u => {
+    const greeting = {
+        welcome: [
+            `Welcome, ${u}`, 
+              `Where have you been, ${u}?`,
+              `${u}, you are IT. No tag backs!`,
+              `${u}, you look familiar.`,
+              `Greetings, "${u}" pun intended, ${u}`,
+              `There's no place like home...except when you are around ${u}.`,
+              `This place might be getting a little crowded. ${u} is taking up too much hard drive space.`
+            
+        ]
+    }
+
+    let i = (Math.ceil(Math.random() * greeting.welcome.length)) - 1
+    return greeting.welcome[i]
 }
 
 
