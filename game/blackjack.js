@@ -75,38 +75,29 @@ class Blackjack {
         }
     }
     calculateScore (player) {
+        player.score = 0 // reset score each time
+        let num_aces = 0 // number of aces counter
         let curr_score = player.score
-        if(player.cards.length === 2) { // inital calculation
-            player.cards.forEach(card => {
-                if (card.split(" ")[0] === "J" ||
-                    card.split(" ")[0] === "Q" ||
-                    card.split(" ")[0] === "K") {
-                        curr_score += 10            
-                    }
-                else if (card.split(" ")[0] === "A"){
-                    if(curr_score > 10) {
-                        curr_score += 1
-                    } else {
-                        curr_score += 11
-                    }
-                } else {
-                    curr_score += Number(card.split(" ")[0])
-                }
-            })
-        } else { // add only last card added to array
-            if (player.cards[player.cards.length-1].split(" ")[0] === "J" ||
-                player.cards[player.cards.length-1].split(" ")[0] === "Q" ||
-                player.cards[player.cards.length-1].split(" ")[0] === "K") {
+        player.cards.forEach(card => {
+            if (card.split(" ")[0] === "J" ||
+                card.split(" ")[0] === "Q" ||
+                card.split(" ")[0] === "K") {
                     curr_score += 10            
                 }
-            else if (player.cards[player.cards.length-1].split(" ")[0] === "A"){
-                if(curr_score >  10) {
-                    curr_score += 1
-                } else {
-                    curr_score += 11
-                }
+            else if (card.split(" ")[0] === "A"){
+                curr_score += 11 // add 11 everything you see an Ace
+                num_aces++ // increate count
             } else {
-                curr_score += Number(player.cards[player.cards.length-1].split(" ")[0])
+                curr_score += Number(card.split(" ")[0])
+            }
+        })
+        //transorm ACE's to 1 if the value is greater than 21
+        while(num_aces >0) { // as long as there is aces
+            if(curr_score > 21) { // if the total score > 21 substract 10 decrease 1 ACE
+                curr_score -= 10
+                num_aces -= 1
+            } else {
+                break
             }
         }
         if (curr_score > 21) {
