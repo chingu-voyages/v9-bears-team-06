@@ -170,7 +170,7 @@ async function playBlackjack(message, player) {
 
 const gameLogic = async (message, game) => {
 //logic to await message for blackjack game!
-    if (game.getPlayer().score != 100) {
+    if (!game.getPlayer().busted) {
         await message.channel.send('Hit or Stay?')
         
         let choice = await message.channel.awaitMessages( c => {
