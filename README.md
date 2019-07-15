@@ -1,21 +1,20 @@
 # v9-bears-team-06
-Discord Fun Bot | Voyage-9 | https://chingu.io/  
+Discord Fun Bot | Voyage-9 
 
 ## Team Members
 Chris  
 Alvaro
 
 **About**  
-Discord fun bot is a bot that you will be able to interact with it and have fun when you need a change of pace in your discord chats. The fun bot will be able to tell you jokes although it might a little raunchy but still might get you a laugh out of you. In addition to that it will
-play BlackJack with you how about that.
+Discord fun bot is a bot that you will be able to interact with it and have fun when you need a change of pace in your discord chats. The fun bot will be able to tell you jokes although it might a little raunchy but still might get you a laugh out of you. In addition to that it will play BlackJack with you how about that.
 
 **Live Demo**  
-to see the live demo you have to join the discord server
+to see the live demo you have to join the discord server https://discord.gg/5uSuRtR
 
 **Technologies**
 - Discord JS
 - Node JS
-- AWS EC2 instance (ubuntu)
+- Heroku
 
 
 # Getting Started
@@ -40,7 +39,7 @@ Go to the section of 'How to add your bot to the server' of this tutorial https:
 and follow the steps to add the bot to the server.  
 
 **License**
-C.A.S.E.
+C.A
 
 Copyright (c) [2019] 
 
