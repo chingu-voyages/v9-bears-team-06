@@ -14,7 +14,8 @@ to see the live demo you have to join the discord server https://discord.gg/5uSu
 **Technologies**
 - Discord JS
 - Node JS
-- Heroku
+- Heroku  
+- Joke API https://sv443.net/jokeapi
 
 
 # Getting Started
