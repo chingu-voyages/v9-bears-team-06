@@ -217,7 +217,7 @@ const gameLogic = async (message, game) => {
 
 function tellJoke(message){
     //ask for user input
-    jokes.getJokes('Any').then(response => {
+    jokes.getJokes('Programming', ['nsfw', 'political', 'religious']).then(response => {
 
         if(response.data.type == 'twopart') {
 
